@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Hopfield Networks</title>
+	<link rel="stylesheet" type="text/css" href="main.css">
+	<script type="text/x-mathjax-config">
+		MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+	</script>
+	<script type="text/javascript"
+	src="http://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+	</script>
+</head>
+<body>
+	<div id="main-cont">
+		
+		<center id="desc">
+			<h1>Hopfield Networks</h1>
+			<div id="content">
+				The Hopfield Network, named after its creator - Nobel Prize winner John Hopfield, is one of the first <i>Neural Networks</i> designed to function as an associative memory system.  It stores patterns as local minimas of a Hamiltonian, allowing it to retrieve complete patterns even when given partially corrupted or incomplete inputs are given.
+				
+				<div id="sandbox-describe">
+					The following sandbox allows you to experiment with a Hopfield network. On the left, you'll find $N = n^2$ nodes arranged in an $n\times n$ grid for visual clarity. You can adjust the number of nodes by modifying the number of "rows" and clicking the reset button. Click on the nodes to toggle their values, and you can add the pattern you've created to the memory by clicking the Add to Memory button. The Clear Board button will clear the board but will not erase the stored memory, while the Reset button completely clears and reinitializes everything.<br>
+
+					On the right, you can see the weight matrix $W$ for the saved patterns displayed as a heatmap.<br><br>
+
+					To observe the Hopfield network in action, first set one or two patterns (ideally with minimal overlap) and add them to memory one by one. Then, clear the board and recreate one of the stored patterns, but with some noise or incompleteness. After that, hit Run. The network will retrieve the stored pattern, effectively filtering out the noise.<br>
+
+					If you save two patterns that are correlated (overlapping), you may end up with a new pattern as the final state of the update process. This behavior mirrors how the human brain can generate new ideas and patterns based on familiar data.<br>
+
+					For more details on the working of the Hopfield network, scroll down the the next section.
+				</div>
+
+				<center id="sandbox">
+					<h2>Sandbox</h2>
+					<div id="sandbox-cont">
+						<div id="sb-left">
+							<div id="board" class="board"></div>
+							<div id="controls" class="controls">
+								<div id="init">
+									<label for="number">Number of rows</label>
+									<input type="number" id="number" value="8"></input>
+									<button onclick="initialize()">Reset</button>
+									<button onclick="clearBoard()">Clear Board</button>
+								</div>
+								<div id="runs">
+									<button onclick="addToMemory()">Add to Memory</button>
+									<button onclick="initWeights()">Clear Memory</button>
+								<!-- <button onclick="synchronous()">Synchronous Run</button> -->
+									<button onclick="run()">Run</button>
+								</div>
+							</div>
+							<div style="margin-top: 20px;">
+								<!-- <button onclick="showSaves()">Refresh Saves</button> -->
+								<h3 style="margin: 0;">Saves:</h3>
+								<div id="saves"></div>
+							</div>
+						</div>
+						<div id="sb-right">
+							<div id="weights" class="board"></div>
+							<div id="heatmap">Weight Matrix: &nbsp; <span id="lower">-1</span> &nbsp; <div id="colors"></div> &nbsp; <span id="upper"> 1</span></div>
+						</div>
+					</div>
+				</center>
+
+				<center><h2>Mathematics Behind It</h2></center>
+				In its simplest form, a Hopfield network consists of $N$ binary neurons, i.e. it is modeled by a $N$ dimensional vector $v\equiv \{ v_i \},~v_i \in \{-1, 1 \}$. The neurons are fully connected, meaning each neuron is connected to every other neuron, with the connection strength represented by a weight matrix $W$ of size $N\times N$. Importantly, the weights are symmetric $W_{ij} = W_{ji}$ and have no self-connection $W_{ii} = 0$<br><br>
+
+				A key property of the Hopfield network is that it is equivalent to a spin system with every spin interacting with every other spin with varying strength which is given by the elements of the weight matrix. Or in other words, we can write an energy of the system as 
+				$$
+				E = -\frac{1}{2}\sum_{i=1}^N \sum_{j=1}^N W_{ij} v_i v_j
+				$$
+				
+				Therefore, one can design a system to set the weights $W_{ij}$ such that the desired patterns become local minimas of the Energy function, and therefore an update sequence starting from a random state converges to one of the local minima.<br><br>
+
+				One common learning rule is the Hebbian learning rule, which sets the weights for storing $P$ (uncorrelated) patterns $\{ \xi_1,~\xi_2,~\cdots,~\xi_P \}$ as follows:
+				$$
+					W = \sum_{i=1}^P \xi_i^T \otimes \xi_i - \mathrm{diag}(\xi_i^T \otimes \xi_i)
+				$$
+				where the $\mathrm{diag}$ function returns a diagonal matrix with the diagonal entries of the given matix (this is to set the self connections to 0), and  
+				$$
+				\xi_i^T \otimes \xi_i = \begin{bmatrix} \xi_i^1 \xi_i^1 & \xi_i^1 \xi_i^2 & \xi_i^1 \xi_i^3 & \cdots \\
+				\xi_i^2 \xi_i^1 & \xi_i^2 \xi_i^2 & \xi_i^2 \xi_i^3 & \cdots \\
+				\xi_i^3 \xi_i^1 & \xi_i^3 \xi_i^2 & \xi_i^3 \xi_i^3 & \cdots \\
+				\vdots & \vdots & \vdots & \ddots   \end{bmatrix}
+				$$
+				<br>
+				The network operates by starting with a random state, and then updating the state of each neuron based on the states of its neighbors, typically using asynchronous (sequential) updates. The update rule is very simple. For each node $v_j$, the update rule is 
+				$$
+				v_i = \mathrm{sgn}(\sum W_{ij} v_j )
+				$$
+				where $\mathrm{sgn}$ is the sign function defined as 
+				$$
+				\mathrm{sgn}(x) = \begin{cases} 1~~~~~~ x\ge 0\\ -1 ~~~ x< 0 \end{cases}
+				$$
+				To see why this update rule leads to reaching a local minima, see that for each update 
+				$$
+				\Delta E = E' - E = \frac{1}{2} \left( \sum_j  v_i W_{ij} v_j - v'_i W_{ij} v_j \right) = \frac{1}{2} \left( (v_i - v'_i)  \sum_j W_{ij} v_j \right)
+				$$
+				where $v_i$ is the initial state of the node and $v'_i = \mathrm{sgn}(\sum W_{ij} v_j )$<br><br>
+				One can see that this update rule always decreases the energy. To see how consider the following cases: 
+				<ol>
+				<li> 
+					$v_i = 1$ and $\mathrm{sgn}(\sum W_{ij} v_j ) = 1$, in which case, $\Delta E = 0$ 
+				</li>
+				<li> 
+					$v_i = 1$ and $\mathrm{sgn}(\sum W_{ij} v_j ) = -1$, in which case, $\Delta E = \sum_j W_{ij}v_j$ which is negative. 
+				</li>
+				<li>
+					$v_i = -1$ and $\mathrm{sgn}(\sum W_{ij} v_j ) = 1$, in which case, $\Delta E = -1\times \sum W_{ij} v_j$ which is negative
+				</li>
+				<li>
+					$v_i = -1$ and $\mathrm{sgn}(\sum W_{ij} v_j ) = -1$, in which case, $\Delta E = 0$
+				</li>
+				</ol>
+				Therefore, we see that at each step, the energy either remains unchanged, or moves towards minima. <br>
+				Thus, the Hopfield update rule leads to a decrease in the energy function by systematically aligning each neuron with its weighted inputs, thereby driving the system toward stable configurations that correspond to associative memories.
+
+				<br><br>
+			</div> 
+		</center>
+	</div>
+</body>
+<script type="text/javascript" src="main.js"></script>
+</html>
