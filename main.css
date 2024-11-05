@@ -36,6 +36,7 @@ body, html{
 	width: 100%;
 	display: grid;
 	grid-template-columns: 1.25fr 1fr;
+	padding-bottom: 20px;
 }
 
 #sandbox{
