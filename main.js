@@ -2,17 +2,17 @@ var grid = [];
 var weights = [];
 var saved = [];
 var n = 0;
-white = 1;
-black = -1;
+black = 1;
+white = -1;
 
 function toggle(i){
-	if(grid[i] == white){
-		grid[i] = black;
-		document.getElementById("t" + i).style.backgroundColor = "black";
-	}
-	else{
+	if(grid[i] == black){
 		grid[i] = white;
 		document.getElementById("t" + i).style.backgroundColor = "white";
+	}
+	else{
+		grid[i] = black;
+		document.getElementById("t" + i).style.backgroundColor = "black";
 	}
 }
 
@@ -21,8 +21,8 @@ function clearBoard(){
 	var board = document.getElementById("board")
 	var tiles = '';
 	for(i=0;i<n**2;i++){
-		tiles = tiles + `<div id="t${i}" class="tile" style="background-color:black" onclick="toggle(${i})"></div>`;
-		grid.push(black);
+		tiles = tiles + `<div id="t${i}" class="tile" style="background-color:white" onclick="toggle(${i})"></div>`;
+		grid.push(white);
 	}
 	board.innerHTML = tiles;
 }
@@ -34,8 +34,8 @@ function initialize(){
 	var board = document.getElementById("board")
 	var tiles = '';
 	for(i=0;i<n**2;i++){
-		tiles = tiles + `<div id="t${i}" class="tile" style="background-color:black" onclick="toggle(${i})"></div>`;
-		grid.push(black);
+		tiles = tiles + `<div id="t${i}" class="tile" style="background-color:white" onclick="toggle(${i})"></div>`;
+		grid.push(white);
 	}
 	board.innerHTML = tiles;
 	initWeights();
@@ -46,7 +46,7 @@ function getColorHex(value) {
     const color2 = { r: 150, g: 150, b: 150 };
     const color3 = { r: 255, g: 255, b: 255 };
 
-    // Interpolate between blue and white for values from -1 to 0
+    // Interpolate between blue and black for values from -1 to 0
     if (value <= 0) {
         const t = value + 1; // Map -1 to 0 range to 0 to 1
         const r = Math.round(color1.r + t * (color2.r - color1.r));
@@ -54,7 +54,7 @@ function getColorHex(value) {
         const b = Math.round(color1.b + t * (color2.b - color1.b));
         return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
     }
-    // Interpolate between white and yellow for values from 0 to 1
+    // Interpolate between black and yellow for values from 0 to 1
     else {
         const t = value; // Value is already in the 0 to 1 range
         const r = Math.round(color2.r + t * (color3.r - color2.r));
@@ -108,11 +108,11 @@ function initWeights(){
 function boardFromGrid(newGrid){
 	grid = [...newGrid];
 	for(i=0;i<n**2;i++){
-		if(grid[i] == white){
-			document.getElementById("t" + i).style.backgroundColor = "white";
+		if(grid[i] == black){
+			document.getElementById("t" + i).style.backgroundColor = "black";
 		}
 		else{
-			document.getElementById("t" + i).style.backgroundColor = "black";
+			document.getElementById("t" + i).style.backgroundColor = "white";
 		}
 	}
 }
@@ -142,12 +142,12 @@ function update(pos){
 	}
 	console.log(`Updating position ${pos}, sum: ${sum}, grid: ${grid[pos]}`); // Debug statement
 	if(sum >= 0){
-		grid[pos] = white;
-		document.getElementById("t" + pos).style.backgroundColor = "white";
-	}
-	else{
 		grid[pos] = black;
 		document.getElementById("t" + pos).style.backgroundColor = "black";
+	}
+	else{
+		grid[pos] = white;
+		document.getElementById("t" + pos).style.backgroundColor = "white";
 	}
 }
 
